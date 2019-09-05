@@ -2,8 +2,9 @@
  * Author: Himanshu Chawla
  */
 const boom  = require("boom"),
-      storageConnection = require('../Adapters')
-      logger = require("../../../../config/logger");
+      storageConnection = require('../Adapters'),
+      logger = require("../../../../config/logger"),
+      ipfsService = require('../ipfsUploadService');
     
 
 
@@ -62,16 +63,14 @@ transactionGenerator.saveDocToAws = async (req,res,next) => {
    
     try{
 
-     
-       let connection = storageConnection('database');
-
-       let transactions = await connection.fetchTransactions(req.query);
-
-       res.status(200).json({
-            success:true,
-            data:transactions
-        })
+        singleUpload(req, res, function(err) {
+            if (err) {
+              return res.status(422).json({success:true,message:"Failed to upload document/image"});
+            }
         
+            return res.status(200).json({success:false,'imageUrl': req.file.location});
+          });
+
     }
     catch(err){
         logger.error(err);
@@ -84,17 +83,9 @@ transactionGenerator.saveDocToAws = async (req,res,next) => {
 transactionGenerator.saveDocToIpfs = async (req,res,next) => {
    
     try{
-
      
-       let connection = storageConnection('database');
-
-       let transactions = await connection.fetchTransactions(req.query);
-
-       res.status(200).json({
-            success:true,
-            data:transactions
-        })
-        
+        let result = await ipfsService.uploadDoc(req);
+        return res.status(200).json(result);
     }
     catch(err){
         logger.error(err);

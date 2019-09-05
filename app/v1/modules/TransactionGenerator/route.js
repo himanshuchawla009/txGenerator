@@ -73,5 +73,16 @@ module.exports = function (router) {
     celebrate(validateSchema.generateTransaction),
     controller.generateTransaction
   );
+
+  router.post('/transaction/uploadToAws',
+	propertyValidator,
+    controller.saveDocToAws
+  );
+
+  router.get('/transaction/allTransactions',
+	propertyValidator,
+    celebrate(validateSchema.generateTransaction),
+    controller.fetchTransactions
+  );
 	
 }
