@@ -1,6 +1,6 @@
 {
   "apps": [{
-    "name" : "audit_sdk",
+    "name" : "txGenerator",
     "script": "app.js",
     "instances": "max",
     "exec_mode": "cluster",

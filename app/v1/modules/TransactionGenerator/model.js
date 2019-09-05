@@ -1,21 +1,34 @@
-var mongoose = require("mongoose");
 
-var Schema = mongoose.Schema;
+const mongoose = require('mongoose');
 
-
-var transactionSchema = new Schema({
- 
-    
-}, {
-    timestamps: {
-      createdAt: 'created_at',
-      updatedAt: 'updated_at'
-    }});
-
-
-var transactions = mongoose.model('Transactions', transactionSchema,'Transactions');
-
-module.exports = transactions;
+const customAttribute = new mongoose.Schema({
+  name: { type: String, required: true },
+  datatype: {
+    type: String,
+    enum: ["uint", "string", "address", "bool","image"],
+    required: true
+  },
+  value: {}
+  
+});
 
 
+  
+const TransactionSchema = new mongoose.Schema(
+    {
+        transactionName: { type: String, required: true},
+        transactionProperties:{ type:[customAttribute]},
+        contractCode: { type: String },
+        txHash: { type: String },
+        storageType: { 
+          type: String,
+          enum: ["blockchain","database"],
+          required: true
+        }
 
+    })
+
+
+
+ const transactions = mongoose.model('Transactions',TransactionSchema,'Transactions');
+ module.exports = transactions;

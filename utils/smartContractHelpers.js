@@ -24,10 +24,6 @@ compileContract = async (contract) => {
 }
 
 
-
-
-
-
 const deployContract = async (abi, byteCode, privateKey) => {
     try {
         return new Promise(async (resolve, reject) => {
