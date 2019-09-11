@@ -33,13 +33,13 @@
                     return {
                         datatype:property.datatype,
                         value:property.value,
-                        name: transactionName+property.name //appending template name so that there will less chances of attribute name getting conflicted with solidity syntax
+                        name: transactionName+property.name.replace(/\s/g,'') //appending template name so that there will less chances of attribute name getting conflicted with solidity syntax
                     };
                 }
                 return {
                     datatype:property.datatype,
                     value:property.value,
-                    name:transactionName+property.name
+                    name:transactionName+property.name.replace(/\s/g,'')
                 };
             });
     
