@@ -69,20 +69,91 @@ module.exports = function (router) {
 	*        	description: Success message
 	*/
 	router.post('/transaction/generateTransaction',
-	propertyValidator,
-    celebrate(validateSchema.generateTransaction),
-    controller.generateTransaction
-  );
+		propertyValidator,
+		celebrate(validateSchema.generateTransaction),
+		controller.generateTransaction
+	);
 
-  router.post('/transaction/uploadToAws',
-	propertyValidator,
-    controller.saveDocToAws
-  );
+	/**
+	* @swagger
+	* /file/uploadAws:
+	*   post:
+	*     description: Api to upload file to aws
+	*     tags:
+	*       - File
+	*     produces:
+	*       - application/json
+	*     parameters:
+	*       - name: awd
+	*         description: file to be uploaded
+	*         in: body
+	*         required: true
+	*         type: file
+	*     responses:
+	*       200:
+	*        	description: Success message
+	*/
+	router.patch('/transaction/uploadToAws',
+		controller.saveDocToAws
+	);
 
-  router.get('/transaction/allTransactions',
-	propertyValidator,
-    celebrate(validateSchema.generateTransaction),
-    controller.fetchTransactions
-  );
+
+	/**
+	* @swagger
+	* /file/uploadIpfs:
+	*   patch:
+	*     description: Api to upload file to ipfs
+	*     tags:
+	*       - File
+	*     produces:
+	*       - application/json
+	*     parameters:
+	*       - name: aws
+	*         description: file to be uploaded
+	*         in: body
+	*         required: true
+	*         type: file
+	*     responses:
+	*       200:
+	*        	description: Success message
+	*/
+	router.patch('/transaction/uploadToIpfs',
+	    controller.ipfsFile,
+		controller.uploadDocToIpfs
+    );
+
+
+	/**
+	* @swagger
+	* /transactions/all:
+	*   patch:
+	*     description: Api to list all transactions
+	*     tags:
+	*       - transactions
+	*     produces:
+	*       - application/json
+	*     parameters:
+	*       - name: page
+	*         description: page number of transactions
+	*         in: query
+	*         required: false
+	*         type: number
+	*       - name: limit
+	*         description: number of transactions to be fetched
+	*         in: query
+	*         required: false
+	*         type: number
+	*       - name: storageType
+	*         description: transactions from a specific storage (blockchain,database)
+	*         in: query
+	*         required: false
+	*         type: string
+	*     responses:
+	*       200:
+	*        	description: transactions data
+	*/
+	router.get('/transaction/allTransactions',
+		controller.fetchTransactions
+	);
 	
 }

@@ -5,15 +5,28 @@ compileContract = async (contract) => {
 
     return new Promise(async (resolve, reject) => {
     try{
-        const contractObject = await solc.compile(contract,1);
-        if(!contractObject.errors)
-        {
-            resolve(contractObject);
+        var input = {
+            language: 'Solidity',
+            sources: {
+                'test.sol': {
+                    content: contract
+                }
+            },
+            settings: {
+                outputSelection: {
+                    '*': {
+                        '*': [ '*' ]
+                    }
+                }
+            }
         }
-        else
-        {
-            reject(contractObject.errors);
-        }
+         
+        var output = JSON.parse(solc.compile(JSON.stringify(input)));
+        console.log("output",output)
+        console.log("output",output.contracts['test.sol']['template'].evm.bytecode.object)
+        console.log("abi",output.contracts['test.sol']['template'].abi)
+
+        resolve(output)
     }
     catch(err)
     {
@@ -22,6 +35,10 @@ compileContract = async (contract) => {
     });   
 
 }
+
+
+
+
 
 
 const deployContract = async (abi, byteCode, privateKey) => {

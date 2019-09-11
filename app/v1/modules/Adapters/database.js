@@ -15,7 +15,7 @@ class DatabaseConnector {
               if (!err) {
                 let res = {
                     status:200,
-                    message:'',
+                    message:'Your transaction has been successfully saved',
                     success:true
                 }
                 resolve(res);
@@ -26,24 +26,20 @@ class DatabaseConnector {
           });
     }
 
-    fetchOneTransaction(query){
+    fetchOneTransaction(id){
         return new Promise((resolve, reject) => {
-            model.findOne(params, (err, data) => {
+            model.findOne({_id:id}, (err, data) => {
               if (!err) {
                 resolve(data);
-                return cb(err, data);
               } else {
                 reject(err);
-                return cb(err, false);
               }
             })
-              .select(selector)
-              .populate(query);
           });
     }
 
     fetchTransactions(params = {},
-        sort = {},
+        sort = { created_at:-1},
         skip = 0,
         limit = 0,
         selector = '',

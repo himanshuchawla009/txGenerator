@@ -16,6 +16,7 @@ const customAttribute = new mongoose.Schema({
   
 const TransactionSchema = new mongoose.Schema(
     {
+        contractAddress:{ type: String },
         transactionName: { type: String, required: true},
         transactionProperties:{ type:[customAttribute]},
         contractCode: { type: String },
@@ -26,7 +27,12 @@ const TransactionSchema = new mongoose.Schema(
           required: true
         }
 
-    })
+    },{
+      'timestamps': {
+          'createdAt': 'created_at',
+          'updatedAt': 'updated_at'
+      }
+  })
 
 
 

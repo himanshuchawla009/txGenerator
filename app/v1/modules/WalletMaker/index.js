@@ -3,7 +3,8 @@ const ethers = require('ethers');
 
 const getWalletFromPrivatekey = (privateKey) => {
     try {
-        var wallet = new ethers.Wallet(privateKey);
+        const prov =  ethers.getDefaultProvider('rinkeby');
+        const wallet = new ethers.Wallet(privateKey,prov);
         return wallet
     } catch (error) {
         throw error;

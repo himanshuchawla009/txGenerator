@@ -11,7 +11,7 @@ const config = {
       domain: "http://localhost:8030",
       webApi: "v1"
     },
-    port: process.env.PORT || 3000,
+    port: process.env.PORT || 4000,
     db: "mongodb://localhost:27017/txGenerator"
   },
   staging: {
@@ -21,7 +21,7 @@ const config = {
       domain: "http://localhost:8030",
       webApi: "v1"
     },
-    port: process.env.PORT || 3000,
+    port: process.env.PORT || 4000,
     db: "mongodb://localhost:27017/txGenerator"
   },
   production: {
@@ -31,7 +31,7 @@ const config = {
       domain: "http://localhost:8030",
       webApi: "v1"
     },
-    port: process.env.PORT || 3000,
+    port: process.env.PORT || 4000,
     db: "mongodb://localhost:27017/txGenerator"
   }
 };

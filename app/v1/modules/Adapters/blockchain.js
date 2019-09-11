@@ -2,9 +2,12 @@
  * Himanshu Chawla
  */
 
+ const ejs = require('ejs');
  const ethers = require('ethers');
  const dotenv = require('dotenv');
  const database = require('./database');
+ const walletMaker = require('../WalletMaker');
+ const { contractTemplate } = require('../TransactionGenerator/contractTemplate');
  const { compileContract, deployContract } = require('../../../../utils/smartContractHelpers');
  dotenv.config();
 
@@ -15,7 +18,8 @@
 
      async saveTransaction(obj) {
         try {
-            let properties = obj.properties;
+            let properties = obj.transactionProperties;
+            let transactionName = obj.transactionName;
     
             /**
              * Converting user defined datatypes like images, documents
@@ -28,12 +32,14 @@
                     property.datatype = 'string';
                     return {
                         datatype:property.datatype,
-                        name: templateName+property.name //appending template name so that there will less chances of attribute name getting conflicted with solidity syntax
+                        value:property.value,
+                        name: transactionName+property.name //appending template name so that there will less chances of attribute name getting conflicted with solidity syntax
                     };
                 }
                 return {
                     datatype:property.datatype,
-                    name:tokenName+property.name
+                    value:property.value,
+                    name:transactionName+property.name
                 };
             });
     
@@ -49,20 +55,28 @@
              * smart contract data can be verified using digital signatures from frontend
              */
             let txContract = ejs.render(
-                erc721, 
+                contractTemplate, 
                 {
                     properties: codeUpdatedProperties,
-                    ownerAddress: ethers.utils.getAddress(ownerWalletAddress)                },
+                    ownerAddress: ethers.utils.getAddress(ownerWalletAddress),
+                    contractName: 'testname',
+                    tokenSymbol: "ANY",
+                    tokenName: 'demotoken',
+                    tokenDecimals: 18,
+                    data: codeUpdatedProperties       
+                    },
                 {}
             );
             const isCompiled = await compileContract(txContract);
             if (isCompiled) {
-                const abi = isCompiled.contracts[':' + contractName].interface;
+                const abi = isCompiled.contracts['test.sol']['template'].abi;
                 const bytecode =
-                    '0x' + isCompiled.contracts[':' + contractName].bytecode;
+                    '0x' + isCompiled.contracts['test.sol']['template'].evm.bytecode.object;
                 const { hash } = await deployContract(
                     abi, bytecode, process.env.PRIVATE_KEY
                 );
+                const prov =  ethers.getDefaultProvider('rinkeby');
+                let receipt = await prov.waitForTransaction(hash);
 
                 /**
                  * 
@@ -79,7 +93,8 @@
                 let txObj = {
                     ...obj,
                     contractCode: txContract,
-                    txHash: hash
+                    txHash: hash,
+                    contractAddress:receipt.contractAddress
                 }
                 await dbConn.saveTransaction(txObj);
     

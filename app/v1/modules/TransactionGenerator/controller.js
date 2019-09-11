@@ -4,7 +4,10 @@
 const boom  = require("boom"),
       storageConnection = require('../Adapters'),
       logger = require("../../../../config/logger"),
-      ipfsService = require('../ipfsUploadService');
+      ipfsService = require('../ipfsUploadService'),
+      multer = require('multer'),
+      ethers = require('ethers'),
+      awsService = require('../AwsUploadService');
     
 
 
@@ -44,7 +47,8 @@ transactionGenerator.fetchTransactions = async (req,res,next) => {
      
        let connection = storageConnection('database');
 
-       let transactions = await connection.fetchTransactions(req.query);
+    
+       let transactions = await connection.fetchTransactions();
 
        res.status(200).json({
             success:true,
@@ -63,12 +67,13 @@ transactionGenerator.saveDocToAws = async (req,res,next) => {
    
     try{
 
-        singleUpload(req, res, function(err) {
+        awsService.uploadToAws(req, res, function(err) {
             if (err) {
-              return res.status(422).json({success:true,message:"Failed to upload document/image"});
+
+              return res.status(422).json({success:false,message:err});
             }
         
-            return res.status(200).json({success:false,'imageUrl': req.file.location});
+            return res.status(200).json({success:true,message:"successfully uploaded to aws",'data': req.file.location});
           });
 
     }
@@ -80,19 +85,37 @@ transactionGenerator.saveDocToAws = async (req,res,next) => {
 };
 
 
-transactionGenerator.saveDocToIpfs = async (req,res,next) => {
-   
-    try{
-     
+transactionGenerator.ipfsFile = multer({
+    // multer settings
+    limits: { fileSize: 20 * 1024 * 1024 },
+    //storage: storage,
+    fileFilter: function (req, file, cb) {
+        if (
+            file.mimetype !== 'application/pdf' &&
+            file.mimetype !== 'image/jpeg' &&
+            file.mimetype !== 'image/jpe' &&
+            file.mimetype !== 'image/jpg'&&
+            file.mimetype !== 'image/png'
+        ) {
+            req.fileValidationError = 'goes wrong on the mimetype';
+            return cb(null, false);
+        }
+        cb(null, true);
+    }
+}).single('ipfs');
+
+transactionGenerator.uploadDocToIpfs = async (req, res, next) => {
+    try {
         let result = await ipfsService.uploadDoc(req);
+
         return res.status(200).json(result);
-    }
-    catch(err){
+    } catch (err) {
+        logger.debug('Error occured while uploading file to ipfs');
         logger.error(err);
-        return next(boom.badImplementation(err));
+        next(err);
     }
-    
 };
+
 
 
 
@@ -103,14 +126,39 @@ transactionGenerator.validateContractData = async (req,res,next) => {
      
        let connection = storageConnection('database');
 
-       let transactions = await connection.fetchTransactions(req.query);
+       let transaction = await connection.fetchOneTransaction(req.query.transactionId);
 
-       res.status(200).json({
-            success:true,
-            data:transactions
+       if(transaction.storageType === 'blockchain') {
+        const isCompiled = await compileContract(transaction.contractCode);
+        if (isCompiled) {
+            const abi = isCompiled.contracts['test.sol']['template'].abi;
+            const bytecode =
+                '0x' + isCompiled.contracts['test.sol']['template'].evm.bytecode.object;
+ 
+        let provider = ethers.getDefaultProvider('rinkeby');
+        let code = await provider.getCode(transaction.contractAddress);
+
+        res.status(200).json({
+             success:true,
+             bytecode: bytecode.length,
+             code:code.length,
+             validate: bytecode.toLowerCase() == code.toLowerCase()
+         })
+         
+       } else {
+        res.status(200).json({
+            success:false,
+            data:"error in compilation"
         })
-        
+       }
+       
+    } else {
+        res.status(200).json({
+            success:true,
+            message: "This transaction doesn,t exist on blockchain"
+        })
     }
+}
     catch(err){
         logger.error(err);
         return next(boom.badImplementation(err));

@@ -7,6 +7,7 @@ const ipfs = new IPFS({
 
 module.exports.uploadDoc = async (req) => {
   return new Promise((resolve,reject)=>{
+      console.log(req.files,"files")
       console.log(req.file.buffer,"filess")
       try {
         if (!req.file.buffer) {

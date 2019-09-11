@@ -2,9 +2,10 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const config = { 
-    "accessKeyId": process.env.ACCESS_ID,
+    "accessKeyId": process.env.ACCESS_KEY,
     "secretAccessKey": process.env.SECRET_KEY,
-    "region": "us-east-1" 
+    "region": "ap-south-1" 
+   
 }
 
 module.exports = config
