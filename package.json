@@ -27,7 +27,7 @@
     "dotenv": "^6.2.0",
     "ejs": "^2.6.1",
     "ethers": "^4.0.25",
-    "express": "^4.16.4",
+    "express": "^4.17.3",
     "filehound": "^1.17.3",
     "fs": "0.0.1-security",
     "glob": "^7.1.3",
